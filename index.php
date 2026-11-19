@@ -33,7 +33,7 @@ $pemilik = ['nama' => 'Pak Raka', 'inisial' => 'PR'];
 
 $menu = [
     ['Dashboard', 'bi-grid-1x2', true, 'index.php'],
-    ['Inventaris Tanaman', 'bi-flower1', false, 'plants/index.php'],
+    ['Inventaris Tanaman', 'bi-flower1', false, 'inventory/index.php'],
     ['Riwayat Harga', 'bi-tag', false, '#'],
     ['Penjualan', 'bi-bag-check', false, '#'],
     ['Laporan', 'bi-bar-chart', false, '#'],
