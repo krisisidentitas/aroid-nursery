@@ -35,7 +35,7 @@ $menu = [
     ['Dashboard', 'bi-grid-1x2', true, 'index.php'],
     ['Inventaris Tanaman', 'bi-flower1', false, 'inventory/index.php'],
     ['Riwayat Harga', 'bi-tag', false, '#'],
-    ['Penjualan', 'bi-bag-check', false, '#'],
+    ['Penjualan', 'bi-bag-check', false, 'sales/index.php'],
     ['Laporan', 'bi-bar-chart', false, '#'],
     ['Pengaturan', 'bi-gear', false, '#'],
 ];

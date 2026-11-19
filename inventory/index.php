@@ -209,13 +209,30 @@ $inventories = $pdo->query("
 
 <div class="container py-5">
 
-    <div class="mb-4">
-        <h2 class="fw-bold">Pengelolaan Stok</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
 
-        <p class="text-secondary">
-            Pantau dan catat jumlah tanaman berdasarkan status.
-        </p>
+        <div>
+            <h2 class="fw-bold">Pengelolaan Stok</h2>
+
+            <p class="text-secondary">
+                Pantau dan catat jumlah tanaman berdasarkan status.
+            </p>
+        </div>
+
+        <a href="transfer.php" class="btn btn-outline-success">
+            <i class="bi bi-arrow-left-right"></i>
+            Pindahkan Stok
+        </a>
+
     </div>
+
+    <?php if (isset($_GET['transfer'])): ?>
+
+        <div class="alert alert-success">
+            Pemindahan stok berhasil dilakukan.
+        </div>
+
+    <?php endif; ?>
 
     <?php if ($success): ?>
         <div class="alert alert-success">
