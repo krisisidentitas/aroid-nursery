@@ -32,12 +32,12 @@ $tanggal = $hari[(int) date('w')] . ', ' . date('j') . ' ' . $bulan[(int) date('
 $pemilik = ['nama' => 'Pak Raka', 'inisial' => 'PR'];
 
 $menu = [
-    ['Dashboard',          'bi-grid-1x2',   true],
-    ['Inventaris Tanaman', 'bi-flower1',    false],
-    ['Riwayat Harga',      'bi-tag',        false],
-    ['Penjualan',          'bi-bag-check',  false],
-    ['Laporan',            'bi-bar-chart',  false],
-    ['Pengaturan',         'bi-gear',       false],
+    ['Dashboard', 'bi-grid-1x2', true, 'index.php'],
+    ['Inventaris Tanaman', 'bi-flower1', false, 'plants/index.php'],
+    ['Riwayat Harga', 'bi-tag', false, '#'],
+    ['Penjualan', 'bi-bag-check', false, '#'],
+    ['Laporan', 'bi-bar-chart', false, '#'],
+    ['Pengaturan', 'bi-gear', false, '#'],
 ];
 
 $statistik = [
@@ -107,10 +107,16 @@ $aktivitas = [
     </div>
 
     <nav class="nav-menu">
-        <?php foreach ($menu as [$nama, $ikon, $aktif]): ?>
-            <a href="#" class="nav-item-link<?= $aktif ? ' active' : '' ?>">
-                <i class="bi <?= $ikon ?>"></i><span><?= $nama ?></span>
+        <?php foreach ($menu as [$nama, $ikon, $aktif, $url]): ?>
+
+            <a href="<?= htmlspecialchars($url) ?>"
+                class="nav-item-link<?= $aktif ? ' active' : '' ?>">
+
+                <i class="bi <?= $ikon ?>"></i>
+                <span><?= htmlspecialchars($nama) ?></span>
+
             </a>
+
         <?php endforeach; ?>
     </nav>
 

@@ -26,12 +26,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const links = document.querySelectorAll('.nav-item-link');
     links.forEach((link) => {
         link.addEventListener('click', (e) => {
-            e.preventDefault(); // halaman lain belum dibuat
-            links.forEach((l) => l.classList.remove('active'));
-            link.classList.add('active');
 
-            const nama = link.querySelector('span').textContent;
-            if (nama !== 'Dashboard') showToast('Halaman "' + nama + '" akan dibuat pada tahap berikutnya.');
+            const url = link.getAttribute('href');
+
+            if (url === '#') {
+                e.preventDefault();
+
+                const nama = link.querySelector('span').textContent;
+
+                showToast(
+                    'Halaman "' + nama + '" akan dibuat pada tahap berikutnya.'
+                );
+
+                return;
+            }
+
             toggleSidebar(false);
         });
     });
