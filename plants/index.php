@@ -32,23 +32,42 @@ $plants = $stmt->fetchAll();
           rel="stylesheet">
 
     <link href="../assets/css/style.css" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+      rel="stylesheet">
 </head>
 
 <body>
 
 <div class="container py-5">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
         <div>
             <h2 class="fw-bold">Inventaris Tanaman</h2>
-            <p class="text-secondary">
-                Kelola jenis tanaman dan harga jual.
+            <p class="text-secondary mb-0">
+                Kelola jenis tanaman, persediaan, dan harga jual.
             </p>
         </div>
 
-        <a href="create.php" class="btn btn-success">
-            + Tambah Tanaman
-        </a>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="../inventory/index.php"
+            class="btn btn-outline-success">
+                <i class="bi bi-box-seam me-1"></i>
+                Pengelolaan Stok
+            </a>
+
+            <a href="../plants/price.history.php"
+            class="btn btn-outline-success">
+                <i class="bi bi-clock-history me-1"></i>
+                Riwayat Harga
+            </a>
+
+            <a href="create.php"
+            class="btn btn-success">
+                <i class="bi bi-plus-lg me-1"></i>
+                Tambah Tanaman
+            </a>
+        </div>
     </div>
 
     <div class="card shadow-sm border-0 rounded-4">

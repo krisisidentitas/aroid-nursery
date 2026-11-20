@@ -1,20 +1,18 @@
 <?php
-/**
- * Aroid Plant Nursery - Dashboard Pemilik
- * Tahap 1: tampilan saja (data dummy, tanpa database dan login).
- */
+
 declare(strict_types=1);
+
 date_default_timezone_set('Asia/Jakarta');
 
-/* ---------- Helper ---------- */
-function rupiah(int $n): string
-{
-    return 'Rp ' . number_format($n, 0, ',', '.');
-}
+require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/includes/functions.php';
+
+/* ---------- Sapaan dan tanggal ---------- */
 
 function sapaan(): string
 {
     $jam = (int) date('G');
+
     return match (true) {
         $jam < 11 => 'Selamat pagi',
         $jam < 15 => 'Selamat siang',
@@ -23,65 +21,342 @@ function sapaan(): string
     };
 }
 
-$hari  = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-$bulan = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli',
-          'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-$tanggal = $hari[(int) date('w')] . ', ' . date('j') . ' ' . $bulan[(int) date('n')] . ' ' . date('Y');
+$hari = [
+    'Minggu', 'Senin', 'Selasa', 'Rabu',
+    'Kamis', 'Jumat', 'Sabtu'
+];
 
-/* ---------- Data dummy ---------- */
-$pemilik = ['nama' => 'Pak Raka', 'inisial' => 'PR'];
+$bulan = [
+    '', 'Januari', 'Februari', 'Maret',
+    'April', 'Mei', 'Juni', 'Juli',
+    'Agustus', 'September', 'Oktober',
+    'November', 'Desember'
+];
+
+$tanggal = $hari[(int) date('w')]
+    . ', ' . date('j')
+    . ' ' . $bulan[(int) date('n')]
+    . ' ' . date('Y');
+
+/* ---------- Informasi pemilik ---------- */
+
+// Belum ada tabel pemilik pada database.
+$pemilik = [
+    'nama' => 'Pemilik',
+    'inisial' => 'P'
+];
+
+/* ---------- Navigasi ---------- */
 
 $menu = [
     ['Dashboard', 'bi-grid-1x2', true, 'index.php'],
-    ['Inventaris Tanaman', 'bi-flower1', false, 'inventory/index.php'],
-    ['Riwayat Harga', 'bi-tag', false, '#'],
+    ['Inventaris Tanaman', 'bi-flower1', false, 'plants/index.php'],
+    ['Riwayat Harga', 'bi-tag', false, 'plants/price.history.php'],
     ['Penjualan', 'bi-bag-check', false, 'sales/index.php'],
-    ['Laporan', 'bi-bar-chart', false, '#'],
-    ['Pengaturan', 'bi-gear', false, '#'],
+    ['Laporan', 'bi-bar-chart', false, 'reports/index.php'],
 ];
+
+/* ---------- Statistik inventaris ---------- */
+
+// Total jenis tanaman aktif.
+$stmt = $pdo->query("
+    SELECT COUNT(*)
+    FROM plant_types
+    WHERE is_active = 1
+");
+
+$totalJenis = (int) $stmt->fetchColumn();
+
+// Total stok berdasarkan status.
+$stmt = $pdo->query("
+    SELECT
+        i.status,
+        COALESCE(SUM(i.quantity), 0) AS total
+    FROM inventories i
+    INNER JOIN plant_types p
+        ON p.id = i.plant_type_id
+    WHERE p.is_active = 1
+    GROUP BY i.status
+");
+
+$stokStatus = [
+    'quarantine' => 0,
+    'cultivation' => 0,
+    'ready' => 0
+];
+
+foreach ($stmt->fetchAll() as $row) {
+    $stokStatus[$row['status']] = (int) $row['total'];
+}
 
 $statistik = [
-    ['Total jenis tanaman', 24,  'bi-collection',  'sage',  'Jenis aktif di katalog'],
-    ['Karantina',           38,  'bi-shield-check', 'amber', 'Tanaman baru masuk'],
-    ['Budidaya',            112, 'bi-moisture',    'leaf',  'Dalam perawatan'],
-    ['Siap jual',           67,  'bi-bag-heart',   'moss',  'Tersedia untuk dijual'],
-];
-
-$penjualan = [
-    'total'     => 18450000,
-    'transaksi' => 27,
-    'rata2'     => 683333,
-    // Data grafik 7 hari terakhir (juta rupiah)
-    'grafik'    => [
-        ['label' => 'Sen', 'nilai' => 1.2],
-        ['label' => 'Sel', 'nilai' => 0.8],
-        ['label' => 'Rab', 'nilai' => 2.4],
-        ['label' => 'Kam', 'nilai' => 1.6],
-        ['label' => 'Jum', 'nilai' => 3.1],
-        ['label' => 'Sab', 'nilai' => 4.2],
-        ['label' => 'Min', 'nilai' => 2.7],
+    [
+        'Total jenis tanaman',
+        $totalJenis,
+        'bi-collection',
+        'sage',
+        'Jenis aktif di katalog'
+    ],
+    [
+        'Karantina',
+        $stokStatus['quarantine'],
+        'bi-shield-check',
+        'amber',
+        'Tanaman baru masuk'
+    ],
+    [
+        'Budidaya',
+        $stokStatus['cultivation'],
+        'bi-moisture',
+        'leaf',
+        'Dalam perawatan'
+    ],
+    [
+        'Siap jual',
+        $stokStatus['ready'],
+        'bi-bag-heart',
+        'moss',
+        'Tersedia untuk dijual'
     ],
 ];
 
-// 'foto' => nama file di assets/img/plants/ (opsional, boleh null)
-$tanaman = [
-    ['Monstera Albo',             null, 12, 'Siap jual', 4,  3500000],
-    ['Philodendron Pink Princess', null, 11, 'Siap jual', 6,  1250000],
-    ['Anthurium Crystallinum',    null, 9,  'Karantina', 4,  850000],
-    ['Alocasia Frydek',           null, 14, 'Budidaya',  8,  450000],
-    ['Syngonium Neon Robusta',    null, 20, 'Budidaya',  12, 125000],
+/* ---------- Ringkasan penjualan bulan ini ---------- */
+
+$awalBulan = date('Y-m-01 00:00:00');
+$awalBulanDepan = date('Y-m-01 00:00:00', strtotime('+1 month'));
+
+$stmt = $pdo->prepare("
+    SELECT
+        COALESCE(SUM(si.subtotal), 0) AS total,
+        COUNT(DISTINCT s.id) AS transaksi
+    FROM sales s
+    INNER JOIN sale_items si
+        ON si.sale_id = s.id
+    WHERE s.sale_date >= :awal
+      AND s.sale_date < :akhir
+");
+
+$stmt->execute([
+    'awal' => $awalBulan,
+    'akhir' => $awalBulanDepan
+]);
+
+$hasilPenjualan = $stmt->fetch();
+
+$totalPenjualan = (int) $hasilPenjualan['total'];
+$totalTransaksi = (int) $hasilPenjualan['transaksi'];
+
+$rataRata = $totalTransaksi > 0
+    ? $totalPenjualan / $totalTransaksi
+    : 0;
+
+/* ---------- Grafik penjualan 7 hari terakhir ---------- */
+
+$awalGrafik = date('Y-m-d 00:00:00', strtotime('-6 days'));
+$akhirGrafik = date('Y-m-d 00:00:00', strtotime('+1 day'));
+
+$stmt = $pdo->prepare("
+    SELECT
+        DATE(s.sale_date) AS tanggal,
+        SUM(si.subtotal) AS total
+    FROM sales s
+    INNER JOIN sale_items si
+        ON si.sale_id = s.id
+    WHERE s.sale_date >= :awal
+      AND s.sale_date < :akhir
+    GROUP BY DATE(s.sale_date)
+    ORDER BY tanggal ASC
+");
+
+$stmt->execute([
+    'awal' => $awalGrafik,
+    'akhir' => $akhirGrafik
+]);
+
+$hasilGrafik = [];
+
+foreach ($stmt->fetchAll() as $row) {
+    $hasilGrafik[$row['tanggal']] =
+        (float) $row['total'] / 1000000;
+}
+
+$singkatanHari = [
+    'Min', 'Sen', 'Sel', 'Rab',
+    'Kam', 'Jum', 'Sab'
 ];
 
-$statusKelas = ['Karantina' => 'amber', 'Budidaya' => 'leaf', 'Siap jual' => 'moss'];
+$grafik = [];
 
-$aktivitas = [
-    ['bi-box-arrow-in-down', 'amber', 'Tanaman masuk',    '5 Anthurium Crystallinum masuk karantina', 'Hari ini, 09.15'],
-    ['bi-bag-check',         'moss',  'Penjualan',        '2 Monstera Albo terjual via live Instagram', 'Hari ini, 08.40'],
-    ['bi-arrow-left-right',  'leaf',  'Perubahan status', '6 Alocasia Frydek pindah ke budidaya', 'Kemarin, 16.20'],
-    ['bi-tag',               'sage',  'Perubahan harga',  'Pink Princess naik ke Rp 1.250.000', 'Kemarin, 11.05'],
-    ['bi-bag-check',         'moss',  'Penjualan',        '1 Syngonium Neon Robusta terjual langsung', '16 Nov, 14.30'],
+for ($i = 6; $i >= 0; $i--) {
+    $tanggalGrafik = date(
+        'Y-m-d',
+        strtotime("-{$i} days")
+    );
+
+    $grafik[] = [
+        'label' => $singkatanHari[
+            (int) date('w', strtotime($tanggalGrafik))
+        ],
+        'nilai' => $hasilGrafik[$tanggalGrafik] ?? 0
+    ];
+}
+
+$penjualan = [
+    'total' => $totalPenjualan,
+    'transaksi' => $totalTransaksi,
+    'rata2' => $rataRata,
+    'grafik' => $grafik
 ];
+
+/* ---------- Tanaman terbaru ---------- */
+
+$stmt = $pdo->query("
+    SELECT
+        p.id,
+        p.type_name,
+        p.photo,
+        p.current_price,
+        COALESCE(SUM(i.quantity), 0) AS total_stok,
+        COALESCE(SUM(
+            CASE WHEN i.status = 'quarantine'
+            THEN i.quantity ELSE 0 END
+        ), 0) AS stok_karantina,
+        COALESCE(SUM(
+            CASE WHEN i.status = 'cultivation'
+            THEN i.quantity ELSE 0 END
+        ), 0) AS stok_budidaya,
+        COALESCE(SUM(
+            CASE WHEN i.status = 'ready'
+            THEN i.quantity ELSE 0 END
+        ), 0) AS stok_siap_jual
+    FROM plant_types p
+    LEFT JOIN inventories i
+        ON i.plant_type_id = p.id
+    WHERE p.is_active = 1
+    GROUP BY
+        p.id,
+        p.type_name,
+        p.photo,
+        p.current_price,
+        p.created_at
+    ORDER BY p.created_at DESC
+    LIMIT 5
+");
+
+$tanaman = [];
+
+foreach ($stmt->fetchAll() as $row) {
+
+    $stokKarantina = (int) $row['stok_karantina'];
+    $stokBudidaya = (int) $row['stok_budidaya'];
+    $stokSiapJual = (int) $row['stok_siap_jual'];
+
+    // Status utama mengikuti tahap dengan jumlah stok terbesar.
+    $jumlahStatus = [
+        'Karantina' => $stokKarantina,
+        'Budidaya' => $stokBudidaya,
+        'Siap jual' => $stokSiapJual
+    ];
+
+    $statusUtama = 'Belum ada stok';
+
+    if ((int) $row['total_stok'] > 0) {
+        $statusUtama = array_search(
+            max($jumlahStatus),
+            $jumlahStatus
+        );
+    }
+
+    $tanaman[] = [
+        'nama' => $row['type_name'],
+        'foto' => $row['photo'],
+        'stok' => (int) $row['total_stok'],
+        'status' => $statusUtama,
+        'harga' => (int) $row['current_price']
+    ];
+}
+
+$statusKelas = [
+    'Karantina' => 'amber',
+    'Budidaya' => 'leaf',
+    'Siap jual' => 'moss',
+    'Belum ada stok' => 'sage'
+];
+
+/* ---------- Aktivitas terbaru ---------- */
+
+$stmt = $pdo->query("
+    SELECT
+        m.movement_type,
+        m.status,
+        m.quantity,
+        m.note,
+        m.occurred_at,
+        p.type_name,
+        s.sales_channel
+    FROM inventory_movements m
+    INNER JOIN plant_types p
+        ON p.id = m.plant_type_id
+    LEFT JOIN sale_items si
+        ON si.id = m.sale_item_id
+    LEFT JOIN sales s
+        ON s.id = si.sale_id
+    ORDER BY m.occurred_at DESC, m.id DESC
+    LIMIT 5
+");
+
+$aktivitas = [];
+
+$namaStatus = [
+    'quarantine' => 'karantina',
+    'cultivation' => 'budidaya',
+    'ready' => 'siap jual'
+];
+
+$namaChannel = [
+    'direct' => 'penjualan langsung',
+    'live' => 'live',
+    'social_media' => 'media sosial'
+];
+
+foreach ($stmt->fetchAll() as $row) {
+
+    if ($row['movement_type'] === 'IN') {
+        $ikon = 'bi-box-arrow-in-down';
+        $warna = 'amber';
+        $judul = 'Tanaman masuk';
+
+        $isi = (int) $row['quantity']
+            . ' ' . $row['type_name']
+            . ' masuk ' . $namaStatus[$row['status']];
+    } else {
+        $ikon = 'bi-bag-check';
+        $warna = 'moss';
+        $judul = 'Penjualan';
+
+        $channel = $namaChannel[$row['sales_channel']]
+            ?? 'penjualan';
+
+        $isi = (int) $row['quantity']
+            . ' ' . $row['type_name']
+            . ' terjual via ' . $channel;
+    }
+
+    if (!empty($row['note'])) {
+        $isi .= ' — ' . $row['note'];
+    }
+
+    $aktivitas[] = [
+        $ikon,
+        $warna,
+        $judul,
+        $isi,
+        date('d M, H:i', strtotime($row['occurred_at']))
+    ];
+}
+
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -120,9 +395,6 @@ $aktivitas = [
         <?php endforeach; ?>
     </nav>
 
-    <button type="button" class="btn-logout" id="btnLogout">
-        <i class="bi bi-box-arrow-left"></i><span>Keluar</span>
-    </button>
 </aside>
 <div class="sidebar-overlay" id="overlay"></div>
 
@@ -200,8 +472,17 @@ $aktivitas = [
                                 <tr><th>Tanaman</th><th>Stok</th><th>Status utama</th><th class="text-end">Harga jual</th></tr>
                             </thead>
                             <tbody>
-                            <?php foreach ($tanaman as [$nama, $foto, $stok, $status, , $harga]): ?>
-                                <?php $adaFoto = $foto && file_exists(__DIR__ . '/assets/img/plants/' . $foto); ?>
+                            <?php foreach ($tanaman as $item): ?>
+                                <?php
+                                    $nama = $item['nama'];
+                                    $foto = $item['foto'];
+                                    $stok = $item['stok'];
+                                    $status = $item['status'];
+                                    $harga = $item['harga'];
+
+                                    $adaFoto = $foto
+                                        && file_exists(__DIR__ . '/assets/img/plants/' . $foto);
+                                ?>
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center gap-3">
@@ -214,7 +495,11 @@ $aktivitas = [
                                         </div>
                                     </td>
                                     <td><?= $stok ?> pcs</td>
-                                    <td><span class="status-pill tone-<?= $statusKelas[$status] ?>"><?= $status ?></span></td>
+                                    <td>
+                                        <span class="status-pill tone-<?= $statusKelas[$status] ?>">
+                                            <?= e($status) ?>
+                                        </span>
+                                    </td>
                                     <td class="text-end fw-semibold"><?= rupiah($harga) ?></td>
                                 </tr>
                             <?php endforeach; ?>

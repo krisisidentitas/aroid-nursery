@@ -209,20 +209,31 @@ $inventories = $pdo->query("
 
 <div class="container py-5">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
 
         <div>
             <h2 class="fw-bold">Pengelolaan Stok</h2>
 
-            <p class="text-secondary">
+            <p class="text-secondary mb-0">
                 Pantau dan catat jumlah tanaman berdasarkan status.
             </p>
         </div>
 
-        <a href="transfer.php" class="btn btn-outline-success">
-            <i class="bi bi-arrow-left-right"></i>
-            Pindahkan Stok
-        </a>
+        <div class="d-flex flex-wrap gap-2">
+
+            <a href="../plants/index.php"
+            class="btn btn-light">
+                <i class="bi bi-arrow-left me-1"></i>
+                Inventaris Tanaman
+            </a>
+
+            <a href="transfer.php"
+            class="btn btn-outline-success">
+                <i class="bi bi-arrow-left-right me-1"></i>
+                Pindahkan Stok
+            </a>
+
+        </div>
 
     </div>
 
@@ -438,10 +449,6 @@ $inventories = $pdo->query("
                 </table>
 
             </div>
-
-            <a href="../index.php" class="btn btn-light mt-3">
-                Kembali ke Dashboard
-            </a>
 
         </div>
 
